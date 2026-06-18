@@ -1,0 +1,691 @@
+Expense Tracker
+Features
+1. Authentication
+•	Register user 
+•	Login user 
+•	Logout user
+2. User Management
+•	Get profile 
+•	Update profile 
+•	Delete account
+3. Expenses
+•	Add expense 
+•	Get all expenses 
+•	Get single expense 
+•	Update expense 
+•	Delete expense
+4. Income
+•	Add income 
+•	Get all income 
+•	Get single income 
+•	Update income 
+•	Delete income
+5. Categories
+•	Create category 
+•	Get categories 
+•	Update category 
+•	Delete category
+6. Dashboard
+•	Total income 
+•	Total expenses 
+•	Balance 
+•	Recent transactions
+7. Reports
+•	Monthly expense report 
+•	Category breakdown 
+•	Yearly summary
+8. Security
+•	JWT authentication 
+•	Password hashing 
+•	User data protection (each user sees only their data)
+9. Filtering (VERY important)
+Allow users to search and narrow results.
+Expenses / Income filters:
+•	by date range (from – to) 
+•	by category 
+•	by type (income or expense if combined model)
+10. Pagination
+So data doesn’t load all at once.
+What it does:
+•	returns data in pages instead of everything
+
+stack
+Express.js
+Mongoose
+JWT
+bcryptjs
+cookie-parser
+zod
+Use MongoDB query features
+Dotenv
+Cors
+morgan
+nodemon
+
+folder structure
+config/
+controllers/
+models/
+routes/
+middlewares/
+utils/
+app.js
+server.js
+.env
+package.json
+
+entity  diagram
+User
+
+fullname: {
+  type: String,
+  required: true,
+  trim: true,
+  minlength,
+  maxlength,
+match
+},
+email: {
+  type: String,
+  required: true,
+  unique: true,
+  lowercase: true,
+  trim: true,
+  match
+},
+password_hash: {
+  type: String,
+  required: true,
+minlength,
+  select: false,
+match
+},
+currency: {
+  type: String,
+  required: true,
+  uppercase: true,
+  enum: [
+    'USD',
+    'EUR',
+    'GBP',
+    'NGN',
+    'CAD',
+    'AUD',
+    'JPY'
+  ],
+  default: 'NGN'
+},
+createdAt: {
+  type: Date,
+  default: Date.now
+},
+
+updatedAt: {
+  type: Date,
+  default: Date.now
+}
+Category
+
+userId: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'User',
+  required: true 
+},
+name: {
+  type: String,
+  required: true, 
+  trim: true,
+  minlength: 2, 
+  maxlength: 30, 
+},
+type: {
+  type: String,
+  required: true, 
+  enum: 
+    ['income', 'expense'],  
+},
+color: {
+  type: String,
+  required: true,
+  match: 
+    /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/
+},
+icon: {
+  type: String,
+  required: true,
+  trim: true,
+  maxlength: 50, 
+},
+createdAt: {
+  type: Date,
+  default: Date.now
+}
+CategorySchema.index(
+  { userId: 1, name: 1, type: 1 },
+  { unique: true }
+);
+Expense
+
+userId: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'User',
+  required: true,
+},
+categoryId: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'Category',
+  required: true, 
+},
+amount: {
+  type: Number,
+  required: true, 
+  min: 
+},
+description: {
+  type: String,
+  trim: true,
+  maxlength:  
+},
+paymentMethod: {
+  type: String,
+  required: true, 
+  enum: {
+      'cash',
+      'bank_transfer',
+      'debit_card',
+      'credit_card',
+      'mobile_money',
+      'other'
+  }
+},
+date: {
+  type: Date,
+  required: true, 
+default: Date.now
+},
+receiptUrl: {
+  type: String,
+  trim: true
+},
+isRecurring: {
+  type: Boolean,
+  default: false
+}
+{
+  timestamps: true
+}
+Income
+userId: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'User',
+  required: true,
+},
+categoryId: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'Category',
+  required: true, 
+},
+amount: {
+  type: Number,
+  required: true,
+  min: 0.01, 
+},
+source: {
+  type: String,
+  required: true, 
+  trim: true,
+  minlength: 2, 
+  maxlength: 50, 
+},
+description: {
+  type: String,
+  trim: true,
+  maxlength: 255
+},
+isRecurring: {
+  type: Boolean,
+  default: false
+},
+date: {
+  type: Date,
+  required: true, 
+default: Date.now
+},
+{
+  timestamps: true
+}
+Refresh token
+userId: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'User',
+  required: true,
+index: true
+},
+token: {
+  type: String,
+  required: true,
+  unique: true,
+},
+expiresAt: {
+  type: Date,
+  required: true, 
+},
+createdAt: {
+  type: Date,
+  default: Date.now
+}
+
+Sequence
+Authentication
+
+POST /auth/register
+Request
+   ↓
+Validate Input
+   ↓
+Check Email Exists
+   ↓
+Hash Password
+   ↓
+Create User
+   ↓
+Generate JWT
+   ↓
+Return Success Response
+POST /auth/login
+Request
+   ↓
+Validate Input
+   ↓
+Find User By Email
+   ↓
+Compare Password
+   ↓
+Generate Access Token
+   ↓
+Generate Refresh Token
+   ↓
+Save Refresh Token
+   ↓
+Return Success Response
+POST /auth/logout
+
+Request
+   ↓
+Get Refresh Token
+   ↓
+Find Refresh Token
+   ↓
+Delete Refresh Token
+   ↓
+Clear Cookie
+   ↓
+Return Success Response
+User
+
+
+GET /users/profile
+Request
+   ↓
+Auth Middleware (JWT)
+   ↓
+Get userId from req.user
+   ↓
+Find user in DB
+   ↓
+Remove password
+   ↓
+Return user profile
+PUT /users/profile
+Request
+   ↓
+Auth Middleware (JWT)
+   ↓
+Validate Input
+   ↓
+Check email uniqueness
+   ↓
+Find & update user in DB
+   ↓
+Remove password
+   ↓
+Return updated profile
+DELETE /users/profile
+Request
+   ↓
+Auth Middleware (JWT)
+   ↓
+Get userId
+   ↓
+Find user
+   ↓
+Delete user-related data (expenses, income, etc.)
+   ↓
+Delete user account
+   ↓
+Clear cookies (optional)
+   ↓
+Return success response
+Expense
+
+POST /expenses
+Request
+   ↓
+Auth Middleware
+   ↓
+Validate input
+   ↓
+Check category exists
+   ↓
+Check ownership
+   ↓
+Create expense
+   ↓
+Save to DB
+   ↓
+Return response
+GET /expenses
+Request
+   ↓
+Auth Middleware
+   ↓
+Extract query params
+   ↓
+Build filter (userId + filters)
+   ↓
+Apply pagination
+   ↓
+Query DB
+   ↓
+Count total records
+   ↓
+Return paginated result
+GET /expenses/:id
+Request
+   ↓
+Auth Middleware
+   ↓
+Get expenseId from params
+   ↓
+Validate ID format
+   ↓
+Find expense in DB
+   ↓
+Check if exists
+   ↓
+Check ownership (userId match)
+   ↓
+Return expense
+PUT /expenses/:id
+Request
+   ↓
+Auth Middleware
+   ↓
+Get expenseId
+   ↓
+Validate input
+   ↓
+Find expense
+   ↓
+Check existence
+   ↓
+Check ownership
+   ↓
+Validate category (if changed)
+   ↓
+Update expense
+   ↓
+Return response
+DELETE /expenses/:id
+Request
+   ↓
+Auth Middleware
+   ↓
+Get expenseId
+   ↓
+Validate ID
+   ↓
+Find expense
+   ↓
+Check existence
+   ↓
+Check ownership
+   ↓
+Delete expense
+   ↓
+Return response
+POST /income
+Request
+   ↓
+Auth Middleware
+   ↓
+Validate input
+   ↓
+Check category exists
+   ↓
+Check ownership
+   ↓
+Create income
+   ↓
+Save to DB
+   ↓
+Return response
+GET /income
+Request
+   ↓
+Auth Middleware
+   ↓
+Extract query params
+   ↓
+Build filter (userId + filters)
+   ↓
+Apply pagination
+   ↓
+Query DB
+   ↓
+Count total records
+   ↓
+Return response
+GET /income/:id
+Request
+   ↓
+Auth Middleware
+   ↓
+Get incomeId from params
+   ↓
+Validate ID format
+   ↓
+Find income in DB
+   ↓
+Check existence
+   ↓
+Check ownership
+   ↓
+Return income
+PUT /income/:id
+Request
+   ↓
+Auth Middleware
+   ↓
+Get incomeId
+   ↓
+Validate input
+   ↓
+Find income
+   ↓
+Check existence
+   ↓
+Check ownership
+   ↓
+Validate category (if changed)
+   ↓
+Update income
+   ↓
+Return response
+DELETE /income/:id
+Request
+   ↓
+Auth Middleware
+   ↓
+Get incomeId
+   ↓
+Validate ID format
+   ↓
+Find income
+   ↓
+Check existence
+   ↓
+Check ownership
+   ↓
+Delete income
+   ↓
+Return response
+Dashboard
+
+GET /dashboard/summary
+Request
+   ↓
+Auth Middleware
+   ↓
+Extract date filters
+   ↓
+Build income & expense filters
+   ↓
+Calculate total income
+   ↓
+Calculate total expenses
+   ↓
+Calculate balance
+   ↓
+Get recent transactions
+   ↓
+Build response
+   ↓
+Return response
+
+Category
+POST /categories
+Request
+   ↓
+Auth Middleware
+   ↓
+Validate input
+   ↓
+Check duplicate category (per user)
+   ↓
+Create category
+   ↓
+Save to DB
+   ↓
+Return response
+GET /categories
+Request
+   ↓
+Auth Middleware
+   ↓
+Extract query params (type)
+   ↓
+Build filter (userId + type)
+   ↓
+Fetch categories from DB
+   ↓
+Sort results
+   ↓
+Return response
+PUT /categories/:id
+Request
+   ↓
+Auth Middleware
+   ↓
+Get categoryId
+   ↓
+Validate input
+   ↓
+Find category
+   ↓
+Check existence
+   ↓
+Check ownership
+   ↓
+Check duplicate name
+   ↓
+Update category
+   ↓
+Return response
+DELETE /categories/:id
+Request
+   ↓
+Auth Middleware
+   ↓
+Get categoryId
+   ↓
+Validate ID format
+   ↓
+Find category
+   ↓
+Check existence
+   ↓
+Check ownership
+   ↓
+Check if used in expenses/income
+   ↓
+Delete category
+   ↓
+Return response
+GET /reports/category
+Request
+   ↓
+Auth Middleware
+   ↓
+Extract filters (from, to, type)
+   ↓
+Build user filter
+   ↓
+Choose model (Income or Expense)
+   ↓
+Aggregate by category
+   ↓
+Join category details (optional)
+   ↓
+Return grouped report
+
+GET /reports/yearly
+Request
+   ↓
+Auth Middleware
+   ↓
+Get year
+   ↓
+Build date range (Jan–Dec)
+   ↓
+Filter user data
+   ↓
+Aggregate income by month
+   ↓
+Aggregate expenses by month
+   ↓
+Merge results
+   ↓
+Fill missing months
+   ↓
+Return yearly report
+GET /reports/monthly
+Request
+   ↓
+Auth Middleware
+   ↓
+Get month & year
+   ↓
+Build date range
+   ↓
+Filter user data
+   ↓
+Aggregate income by day
+   ↓
+Aggregate expenses by day
+   ↓
+Merge results
+   ↓
+Fill missing days
+   ↓
+Return response
