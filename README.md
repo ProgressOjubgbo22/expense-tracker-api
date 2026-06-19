@@ -2,6 +2,15 @@
 
 A full-featured REST API for personal finance tracking built with Express.js, MongoDB, and JWT authentication.
 
+---
+## 🌐 Live API
+
+The API is deployed on Render and accessible at:
+
+🔗https://expense-tracker-api-dryk.onrender.com
+
+---
+
 ## Stack
 
 - **Express.js** – HTTP server & routing
